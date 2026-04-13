@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File
 import os
 import uuid
 from services.pdf_service import extract_text
+from services.rag_service import chunk_text, store_embeddings
 
 router = APIRouter()
 
@@ -27,7 +28,11 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     print("----- Extracted Text -----")
     print(text[:500])
+    
+    chunks = chunk_text(text)
+    store_embeddings(chunks)
 
+    print("Chunks stored:", len(chunks))
     # ✅ Handle empty text
     if not text.strip():
         return {"message": "PDF uploaded but no readable text found"}
