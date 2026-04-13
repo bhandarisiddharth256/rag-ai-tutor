@@ -36,15 +36,15 @@ def store_embeddings(chunks):
     embeddings = np.array(embeddings).astype("float32")
 
     dimension = embeddings.shape[1]
-
+    print("Storing chunks:", len(chunks))
     if index is None:
         index = faiss.IndexFlatIP(dimension)
-
+  
     index.add(embeddings)
     stored_chunks.extend(chunks)
 
 
-def search(query, k=3):
+def search(query, k=5):
     global index, stored_chunks
 
     if index is None or len(stored_chunks) == 0:
@@ -55,9 +55,14 @@ def search(query, k=3):
 
     D, I = index.search(query_embedding, k)
 
+    print("Scores:", D)
+    print("Indexes:", I)
+
     results = []
+
     for idx in I[0]:
         if 0 <= idx < len(stored_chunks):
             results.append(stored_chunks[idx])
 
-    return results
+    # ✅ ALWAYS RETURN LIST
+    return results if results else ["No relevant context found"]

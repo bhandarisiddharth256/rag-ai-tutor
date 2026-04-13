@@ -28,7 +28,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     print("----- Extracted Text -----")
     print(text[:500])
-    
+    print("TEXT LENGTH:", len(text))
     chunks = chunk_text(text)
     store_embeddings(chunks)
 
