@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File
 import os
+import uuid
 from services.pdf_service import extract_text
 
 router = APIRouter()
@@ -9,18 +10,29 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @router.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+
+    # ✅ Validate file type
+    if not file.filename.endswith(".pdf"):
+        return {"error": "Only PDF files allowed"}
+
+    # ✅ Unique filename
+    unique_name = f"{uuid.uuid4()}_{file.filename}"
+    file_path = os.path.join(UPLOAD_FOLDER, unique_name)
 
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
-    # 🔥 NEW: extract text
+    # ✅ Extract text
     text = extract_text(file_path)
 
     print("----- Extracted Text -----")
-    print(text[:500])  # print first 500 chars
+    print(text[:500])
+
+    # ✅ Handle empty text
+    if not text.strip():
+        return {"message": "PDF uploaded but no readable text found"}
 
     return {
         "message": "File uploaded & processed",
-        "filename": file.filename
+        "filename": unique_name
     }

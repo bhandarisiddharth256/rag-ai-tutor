@@ -1,14 +1,20 @@
 from PyPDF2 import PdfReader
 
 def extract_text(file_path):
-    reader = PdfReader(file_path)
+    try:
+        reader = PdfReader(file_path)
 
-    # 🔥 Handle encrypted PDF
-    if reader.is_encrypted:
-        reader.decrypt("")  # try empty password
+        if reader.is_encrypted:
+            reader.decrypt("")
 
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text() or ""
+        text = ""
+        for page in reader.pages:
+            extracted = page.extract_text()
+            if extracted:
+                text += extracted
 
-    return text
+        return text
+
+    except Exception as e:
+        print("PDF extraction error:", e)
+        return ""
