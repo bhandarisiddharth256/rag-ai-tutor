@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File
 import os
+from services.pdf_service import extract_text
 
 router = APIRouter()
 
@@ -13,4 +14,13 @@ async def upload_pdf(file: UploadFile = File(...)):
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
-    return {"message": "File uploaded successfully"}
+    # 🔥 NEW: extract text
+    text = extract_text(file_path)
+
+    print("----- Extracted Text -----")
+    print(text[:500])  # print first 500 chars
+
+    return {
+        "message": "File uploaded & processed",
+        "filename": file.filename
+    }
